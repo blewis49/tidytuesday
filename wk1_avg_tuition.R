@@ -1,29 +1,27 @@
+library(tidyr)
 library(readxl)
 library(ggplot2)
-# setwd()
+library(dplyr)
 
-avg_tuition <- read_xlsx("../TidyTuesday/data/us_avg_tuition.xlsx")
-head(avg_tuition)
-str(avg_tuition)
-ggplot(data = avg_tuition) + 
-      geom_col(mapping = aes(x = State, y = `2015-16`),fill = "blue") +
-      coord_flip()
-
-# Do the same with geom_bar but change stat to equal "identity"
-# Use reorder() function to display lowest to highest tuition by state
-# Provide a Title and axis labels to the plot
-ggplot(data = avg_tuition) +
-      geom_bar(mapping = aes(x = reorder(State, -`2015-16`), y = `2015-16`), stat = "identity", fill = "blue") +
+avg_tuition <- read_xlsx("./data/us_avg_tuition.xlsx")
+tuition_plot <- avg_tuition %>% 
+      gather(key = "year", value = "tuition", `2004-05`:`2015-16`) %>% 
+      filter(year == "2015-16") %>% 
+      ggplot(mapping = aes(x = reorder(State, tuition), y = tuition)) + 
+      geom_bar(stat = "identity") +
       coord_flip() +
-      ggtitle("Average US Tuition Costs for 2015-2016 ordered by State") +
-      ylab("Academic Year 2015-16 Tuition ($)") +
-      xlab("50 US States")
+      labs(title = "US Tuition Costs for 2015-2016 by State",
+      y = "Academic Year 2015-16 Tuition ($)", 
+      x = "US State",
+      caption = "Source: https://trends.collegeboard.org/college-pricing/ | graphic by @jblewis49")
+
+tuition_plot # view plot 
+
+ggsave("tuition_plot.png",  plot = last_plot(), width = 12, height = 6, dpi = 600)
 
 
 # I want to add a row of the column means to this dataframe to display the US AVG Tuition, 
 # but cannot figure out how.
-US_avg <- apply(avg_tuition[,2:13], 2, mean)
-t(USAVG)
 
 
 
